@@ -58,7 +58,7 @@ module CartesianFrame =
         when 'A : comparison
         and 'E : comparison
         and 'W : comparison> (C : CartesianFrame<'A, 'E, 'W>) =
-        let rowMap =
+        let actions =
             seq {
                 for a in C.Actions do
                     let row =
@@ -66,13 +66,13 @@ module CartesianFrame =
                     row, a
             }
                 |> Seq.groupBy fst
-                |> Seq.map (fun (row, group) ->
-                    row, Seq.head group |> snd)
-                |> Map
+                |> Seq.map (fun (_, group) ->
+                    Seq.head group |> snd)
+                |> set
         {
-            Actions = set rowMap.Keys   // a Map's keys are guaranteed to be distinct, but F# doesn't expose them as a Set
+            Actions = actions
             Environments = C.Environments
-            Operator = fun (row, e) -> C[rowMap[row], e]
+            Operator = C.Operator
         }
 
     let collapse C =
