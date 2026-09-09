@@ -8,9 +8,28 @@ type RoadNew = Seaside = 10 | Highway = 11 | Country = 12
 type WeatherOld = Rainy = 0 | Cloudy = 1 | Sunny = 2
 type WeatherNew = Rainy = 10 | Cloudy = 11 | Sunny = 12
 
-module Tests =
+module CartesianFrame =
 
-    let toFrame actions environments pairs =
+    let print C =
+
+        let headers =
+            seq {
+                ""
+                for e in C.Environments do
+                    string e
+            } |> String.concat "\t"
+        printfn $"{headers}"
+
+        for a in C.Actions do
+            let values =
+                seq {
+                    string a
+                    for e in C.Environments do
+                        string C[a, e]
+                } |> String.concat "\t"
+            printfn $"{values}"
+
+    let ofPairs actions environments pairs =
         let map = Map pairs
         {
             Actions = set actions
@@ -18,8 +37,10 @@ module Tests =
             Operator = fun key -> map[key]
         }
 
+module Tests =
+
     let toFrameEnum pairs =
-        toFrame
+        CartesianFrame.ofPairs
             (Enum.GetValues<'A>())
             (Enum.GetValues<'E>())
             pairs

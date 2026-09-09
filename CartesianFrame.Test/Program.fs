@@ -14,8 +14,8 @@ module Program =
             (3, 2), 5
             (3, 3), 6
         ]
-    let C = Tests.toFrame [1..3] [1..3] pairs
-    let D = Tests.toFrame [1..2] [1..3] (List.take 6 pairs)
+    let C = CartesianFrame.ofPairs [1..3] [1..3] pairs
     let C' = CartesianFrame.collapse C
+    let D = CartesianFrame.ofPairs [1..2] [1..3] (List.take 6 pairs)
     CartesianFrame.print C'
-
+    CartesianFrame.print D

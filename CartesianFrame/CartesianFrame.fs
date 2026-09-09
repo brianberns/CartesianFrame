@@ -81,22 +81,3 @@ module CartesianFrame =
             |> dual
             |> collapseRows
             |> dual
-
-    let print C =
-
-        let headers =
-            seq {
-                ""
-                for e in C.Environments do
-                    string e
-            } |> String.concat "\t"
-        printfn $"{headers}"
-
-        for a in C.Actions do
-            let values =
-                seq {
-                    string a
-                    for e in C.Environments do
-                        string C[a, e]
-                } |> String.concat "\t"
-            printfn $"{values}"
