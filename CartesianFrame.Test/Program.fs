@@ -2,9 +2,10 @@ namespace CartesianFrame
 
 module Program =
 
-    do
-        let pairs =
-            [
+    let example1 () =
+
+        let C =
+            CartesianFrame.ofTuples [
                 "a1", "e1", "w1"
                 "a1", "e2", "w2"
                 "a1", "e3", "w3"
@@ -12,16 +13,10 @@ module Program =
                 "a2", "e2", "w5"
                 "a2", "e3", "w6"
             ]
-        let C =
-            CartesianFrame.ofTuples
-                [ "a1"; "a2" ]
-                [ "e1"; "e2"; "e3" ]
-                pairs
         CartesianFrame.print C
 
-    do
-        let pairs =
-            [
+        let D =
+            CartesianFrame.ofTuples [
                 "b1", "f1", "w1"
                 "b1", "f2", "w2"
                 "b1", "f3", "w3"
@@ -32,10 +27,22 @@ module Program =
                 "b3", "f2", "w5"
                 "b3", "f3", "w6"
             ]
-        let D =
-            CartesianFrame.ofTuples
-                [ "b1"; "b2"; "b3" ]
-                [ "f1"; "f2"; "f3" ]
-                pairs
         CartesianFrame.print D
         CartesianFrame.print (CartesianFrame.collapse D)
+
+    let example2 () =
+        let D =
+            CartesianFrame.ofTuples [
+                "C", "O", "o"
+                "C", "A", "a"
+                "C", "OC", "c"
+                "C", "AC", "c"
+                "~C", "O", "o"
+                "~C", "A", "a"
+                "~C", "OC", "o"
+                "~C", "AC", "a"
+            ]
+        CartesianFrame.print D
+
+    example1 ()
+    example2 ()

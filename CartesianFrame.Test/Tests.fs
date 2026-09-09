@@ -30,29 +30,31 @@ module CartesianFrame =
                 } |> String.concat "\t"
             printfn $"{values}"
 
-    let ofTuples actions environments tuples =
+    let ofTuples tuples =
+        let actions =
+            tuples
+                |> Seq.map (fun (a, _, _) -> a)
+                |> set
+        let envs =
+            tuples
+                |> Seq.map (fun (_, e, _) -> e)
+                |> set
         let map =
             tuples
                 |> Seq.map (fun (a, e, w) -> (a, e), w)
                 |> Map
         {
-            Actions = set actions
-            Environments = set environments
+            Actions = actions
+            Environments = envs
             Operator = fun key -> map[key]
         }
 
 module Tests =
 
-    let toFrameEnum tuples =
-        CartesianFrame.ofTuples
-            (Enum.GetValues<'A>())
-            (Enum.GetValues<'E>())
-            tuples
-
     [<Fact>]
     let driver () =
         let C =
-            toFrameEnum [
+            CartesianFrame.ofTuples [
                 RoadOld.Seaside, WeatherOld.Rainy, 1
                 RoadOld.Seaside, WeatherOld.Cloudy, 5
                 RoadOld.Seaside, WeatherOld.Sunny, 7
@@ -61,7 +63,7 @@ module Tests =
                 RoadOld.Highway, WeatherOld.Sunny, 5
             ]
         let D =
-            toFrameEnum [
+            CartesianFrame.ofTuples [
                 RoadNew.Seaside, WeatherNew.Rainy, 1
                 RoadNew.Seaside, WeatherNew.Cloudy, 5
                 RoadNew.Seaside, WeatherNew.Sunny, 7
