@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CartesianFrame.Test/CartesianFrame.Test.fsproj" />
+  <Project Path="CartesianFrame/CartesianFrame.fsproj" />
+</Solution>
