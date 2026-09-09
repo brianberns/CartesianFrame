@@ -59,23 +59,20 @@ module CartesianFrame =
         and 'E : comparison
         and 'W : comparison> (C : CartesianFrame<'A, 'E, 'W>) =
         let rowMap =
-            [
+            seq {
                 for a in C.Actions do
                     let row =
-                        [
-                            for e in C.Environments do
-                                C[a, e]
-                        ]
+                        [ for e in C.Environments -> C[a, e] ]
                     row, a
-            ]
+            }
                 |> Seq.groupBy fst
                 |> Seq.map (fun (row, group) ->
                     row, Seq.head group |> snd)
                 |> Map
         {
-            Actions = set rowMap.Keys   // keys are guaranteed to be distinct, but F# doesn't expose them as a Set
+            Actions = set rowMap.Keys   // a Map's keys are guaranteed to be distinct, but F# doesn't expose them as a Set
             Environments = C.Environments
-            Operator = fun (row, env) -> C[rowMap[row], env]
+            Operator = fun (row, e) -> C[rowMap[row], e]
         }
 
     let collapse C =
@@ -84,3 +81,22 @@ module CartesianFrame =
             |> dual
             |> collapseRows
             |> dual
+
+    let print C =
+
+        let headers =
+            seq {
+                ""
+                for e in C.Environments do
+                    string e
+            } |> String.concat "\t"
+        printfn $"{headers}"
+
+        for a in C.Actions do
+            let values =
+                seq {
+                    string a
+                    for e in C.Environments do
+                        string C[a, e]
+                } |> String.concat "\t"
+            printfn $"{values}"

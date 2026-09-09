@@ -17,4 +17,5 @@ module Program =
     let C = Tests.toFrame [1..3] [1..3] pairs
     let D = Tests.toFrame [1..2] [1..3] (List.take 6 pairs)
     let C' = CartesianFrame.collapse C
-    printfn "%A" C'
+    CartesianFrame.print C'
+
