@@ -81,3 +81,10 @@ module CartesianFrame =
             |> dual
             |> collapseRows
             |> dual
+
+    let map f C =
+        {
+            Actions = C.Actions
+            Environments = C.Environments
+            Operator = fun key -> C[key] |> f
+        }

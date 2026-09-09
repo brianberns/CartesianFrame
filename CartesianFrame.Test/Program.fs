@@ -31,6 +31,7 @@ module Program =
         CartesianFrame.print (CartesianFrame.collapse D)
 
     let example2 () =
+
         let D =
             CartesianFrame.ofTuples [
                 "C", "O", "o"
@@ -43,6 +44,15 @@ module Program =
                 "~C", "AC", "a"
             ]
         CartesianFrame.print D
+
+        let D' =
+            D
+                |> CartesianFrame.map (function
+                    | "o" | "a" -> 2
+                    | "c" -> 3
+                    | _ -> failwith "Unexpected")
+                |> CartesianFrame.collapse
+        CartesianFrame.print D'
 
     example1 ()
     example2 ()
