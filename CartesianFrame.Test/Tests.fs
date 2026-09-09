@@ -13,8 +13,8 @@ module Tests =
     let toFrame actions environments pairs =
         let map = Map pairs
         {
-            Actions = actions
-            Environments = environments
+            Actions = set actions
+            Environments = set environments
             Operator = fun key -> map[key]
         }
 
@@ -57,22 +57,3 @@ module Tests =
             | WeatherNew.Sunny -> WeatherOld.Sunny
             | _ -> failwith "Unexpected"
         Assert.True(CartesianFrame.isMorphism C D (g, h))
-
-    [<Fact>]
-    let collapse () =
-        let pairs =
-            [
-                (1, 1), 1
-                (1, 2), 2
-                (1, 3), 3
-                (2, 1), 4
-                (2, 2), 5
-                (2, 3), 6
-                (3, 1), 4
-                (3, 2), 5
-                (3, 3), 6
-            ]
-        let C = toFrame [1..3] [1..3] pairs
-        let D = toFrame [1..2] [1..3] (List.take 6 pairs)
-        let C' = CartesianFrame.collapse C
-        ()

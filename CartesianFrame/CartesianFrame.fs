@@ -1,9 +1,11 @@
 ﻿namespace CartesianFrame
 
-type CartesianFrame<'A, 'E, 'W> =
+type CartesianFrame<'A, 'E, 'W
+    when 'A : comparison
+    and 'E : comparison> =
     {
-        Actions : seq<'A>
-        Environments : seq<'E>
+        Actions : Set<'A>
+        Environments : Set<'E>
         Operator : 'A * 'E -> 'W
     }
 
@@ -53,7 +55,9 @@ module CartesianFrame =
         }
 
     let private collapseRows<'A, 'E, 'W
-        when 'W : comparison> (C : CartesianFrame<'A, 'E, 'W>) =
+        when 'A : comparison
+        and 'E : comparison
+        and 'W : comparison> (C : CartesianFrame<'A, 'E, 'W>) =
         let rowMap =
             [
                 for a in C.Actions do
@@ -69,7 +73,7 @@ module CartesianFrame =
                     row, Seq.head group |> snd)
                 |> Map
         {
-            Actions = rowMap.Keys
+            Actions = set rowMap.Keys   // keys are guaranteed to be distinct, but F# doesn't expose them as a Set
             Environments = C.Environments
             Operator = fun (row, env) -> C[rowMap[row], env]
         }
