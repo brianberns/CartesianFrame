@@ -12,6 +12,7 @@ module CartesianFrame =
 
     let print C =
 
+        printfn ""
         let headers =
             seq {
                 ""
@@ -29,8 +30,11 @@ module CartesianFrame =
                 } |> String.concat "\t"
             printfn $"{values}"
 
-    let ofPairs actions environments pairs =
-        let map = Map pairs
+    let ofTuples actions environments tuples =
+        let map =
+            tuples
+                |> Seq.map (fun (a, e, w) -> (a, e), w)
+                |> Map
         {
             Actions = set actions
             Environments = set environments
@@ -39,34 +43,34 @@ module CartesianFrame =
 
 module Tests =
 
-    let toFrameEnum pairs =
-        CartesianFrame.ofPairs
+    let toFrameEnum tuples =
+        CartesianFrame.ofTuples
             (Enum.GetValues<'A>())
             (Enum.GetValues<'E>())
-            pairs
+            tuples
 
     [<Fact>]
     let driver () =
         let C =
             toFrameEnum [
-                (RoadOld.Seaside, WeatherOld.Rainy), 1
-                (RoadOld.Seaside, WeatherOld.Cloudy), 5
-                (RoadOld.Seaside, WeatherOld.Sunny), 7
-                (RoadOld.Highway, WeatherOld.Rainy), 5
-                (RoadOld.Highway, WeatherOld.Cloudy), 5
-                (RoadOld.Highway, WeatherOld.Sunny), 5
+                RoadOld.Seaside, WeatherOld.Rainy, 1
+                RoadOld.Seaside, WeatherOld.Cloudy, 5
+                RoadOld.Seaside, WeatherOld.Sunny, 7
+                RoadOld.Highway, WeatherOld.Rainy, 5
+                RoadOld.Highway, WeatherOld.Cloudy, 5
+                RoadOld.Highway, WeatherOld.Sunny, 5
             ]
         let D =
             toFrameEnum [
-                (RoadNew.Seaside, WeatherNew.Rainy), 1
-                (RoadNew.Seaside, WeatherNew.Cloudy), 5
-                (RoadNew.Seaside, WeatherNew.Sunny), 7
-                (RoadNew.Highway, WeatherNew.Rainy), 5
-                (RoadNew.Highway, WeatherNew.Cloudy), 5
-                (RoadNew.Highway, WeatherNew.Sunny), 5
-                (RoadNew.Country, WeatherNew.Rainy), 6
-                (RoadNew.Country, WeatherNew.Cloudy), 6
-                (RoadNew.Country, WeatherNew.Sunny), 6
+                RoadNew.Seaside, WeatherNew.Rainy, 1
+                RoadNew.Seaside, WeatherNew.Cloudy, 5
+                RoadNew.Seaside, WeatherNew.Sunny, 7
+                RoadNew.Highway, WeatherNew.Rainy, 5
+                RoadNew.Highway, WeatherNew.Cloudy, 5
+                RoadNew.Highway, WeatherNew.Sunny, 5
+                RoadNew.Country, WeatherNew.Rainy, 6
+                RoadNew.Country, WeatherNew.Cloudy, 6
+                RoadNew.Country, WeatherNew.Sunny, 6
             ]
         let g = function
             | RoadOld.Seaside -> RoadNew.Seaside
