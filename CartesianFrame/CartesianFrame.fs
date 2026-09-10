@@ -1,52 +1,29 @@
 ﻿namespace CartesianFrame
 
-type CartesianFrame<'A, 'E, 'W
-    when 'A : comparison
-    and 'E : comparison> =
+/// Cartesian frame as defined in https://arxiv.org/pdf/2109.10996.
+type CartesianFrame<'Action, 'Environment, 'World
+    when 'Action : comparison
+    and 'Environment : comparison> =
     {
-        Actions : Set<'A>
-        Environments : Set<'E>
-        Operator : 'A * 'E -> 'W
+        /// Actions available to the agent.
+        Actions : Set<'Action>
+
+        /// Possible environmental states.
+        Environments : Set<'Environment>
+
+        /// Answers the outcome of taking the given action in the
+        /// given state.
+        Operator : 'Action * 'Environment -> 'World
     }
 
+    /// Answers the outcome of taking the given action in the
+    /// given state.
     member frame.Item(a, e) =
         frame.Operator(a, e)
 
-module Function =
-
-    let isInjective f inputs =
-        inputs
-            |> Seq.countBy f
-            |> Seq.forall (fun (_, count) ->
-                count = 1)
-
-    let isSurjective f inputs outputs =
-        let image =
-            Seq.map f inputs
-                |> set
-        Seq.forall (fun output ->
-            image.Contains(output))
-            outputs
-
-    let isBijective f inputs outputs =
-        isInjective f inputs
-            && isSurjective f inputs outputs
-
 module CartesianFrame =
 
-    let isMorphism C D (g, h) =
-        seq {
-            for a in C.Actions do
-                for f in D.Environments do
-                    a, f
-        } |> Seq.forall (fun (a, f) ->
-            C[a, h f] = D[g a, f])
-
-    let isIsomorphism C D (g, h) =
-        isMorphism C D (g, h)
-            && Function.isBijective g C.Actions C.Environments
-            && Function.isBijective h D.Actions D.Environments
-
+    /// Answers the dual (matrix transposition) of the given frame.
     let dual C =
         {
             Actions = C.Environments
@@ -54,6 +31,7 @@ module CartesianFrame =
             Operator = fun (e, a) -> C[a, e]
         }
 
+    /// Collapses the rows of the given frame.
     let private collapseRows<'A, 'E, 'W
         when 'A : comparison
         and 'E : comparison
@@ -67,7 +45,7 @@ module CartesianFrame =
             }
                 |> Seq.groupBy fst
                 |> Seq.map (fun (_, group) ->
-                    Seq.head group |> snd)
+                    Seq.head group |> snd)   // arbitrarily choose an action to represent the entire group
                 |> set
         {
             Actions = actions
@@ -75,6 +53,8 @@ module CartesianFrame =
             Operator = C.Operator
         }
 
+    /// Answers the "biextensional collapse" of the given frame
+    /// by deleting duplicate rows and columns.
     let collapse C =
         C
             |> collapseRows
@@ -82,6 +62,7 @@ module CartesianFrame =
             |> collapseRows
             |> dual
 
+    /// Maps the given function over the given frame.
     let map f C =
         {
             Actions = C.Actions
@@ -89,6 +70,7 @@ module CartesianFrame =
             Operator = fun key -> C[key] |> f
         }
 
+    /// Applies the functor induced by frame C to frame D.
     let apply C D =
         {
             Actions = D.Actions
