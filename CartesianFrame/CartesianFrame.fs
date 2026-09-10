@@ -88,3 +88,18 @@ module CartesianFrame =
             Environments = C.Environments
             Operator = fun key -> C[key] |> f
         }
+
+    let apply C D =
+        {
+            Actions = D.Actions
+            Environments =
+                set [
+                    for ed in D.Environments do
+                        for ec in C.Environments do
+                            ed, ec
+                ]
+            Operator =
+                fun (ad, (ed, ec)) ->
+                    let ac = D[ad, ed]
+                    C[ac, ec]
+        }

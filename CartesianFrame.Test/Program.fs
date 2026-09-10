@@ -54,5 +54,28 @@ module Program =
                 |> CartesianFrame.collapse
         CartesianFrame.print D'
 
-    example1 ()
-    example2 ()
+    let example3 () =
+
+        let D =
+            CartesianFrame.ofTuples [
+                "Accept", "CA offer", "CA"
+                "Decline", "CA offer", "WA"
+                "Accept", "WA offer", "WA"
+                "Decline", "WA offer", "WA"
+            ]
+
+        let C =
+            CartesianFrame.ofTuples [
+                "CA", "Capital", "Sacramento"
+                "CA", "Largest", "Los Angeles"
+                "WA", "Capital", "Olympia"
+                "WA", "Largest", "Seattle"
+            ]
+
+        let D' =
+            CartesianFrame.apply C D
+        CartesianFrame.print D'
+
+    // example1 ()
+    // example2 ()
+    example3 ()
