@@ -32,10 +32,7 @@ module CartesianFrame =
         }
 
     /// Collapses the rows of the given frame.
-    let private collapseRows<'A, 'E, 'W
-        when 'A : comparison
-        and 'E : comparison
-        and 'W : comparison> (C : CartesianFrame<'A, 'E, 'W>) =
+    let private collapseRows C =
         let actions =
             seq {
                 for a in C.Actions do

@@ -75,6 +75,6 @@ module Program =
         let D' = CartesianFrame.apply C D
         CartesianFrame.print D'
 
-    // example1 ()
-    // example2 ()
+    example1 ()
+    example2 ()
     example3 ()
