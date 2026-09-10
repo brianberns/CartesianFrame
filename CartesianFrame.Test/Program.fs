@@ -72,8 +72,7 @@ module Program =
                 "WA", "Largest", "Seattle"
             ]
 
-        let D' =
-            CartesianFrame.apply C D
+        let D' = CartesianFrame.apply C D
         CartesianFrame.print D'
 
     // example1 ()
