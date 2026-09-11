@@ -1,6 +1,9 @@
 ﻿namespace CartesianFrame
 
+open System
+
 /// Cartesian frame as defined in https://arxiv.org/pdf/2109.10996.
+[<StructuredFormatDisplay("{String}")>]
 type CartesianFrame<'Action, 'Environment, 'World
     when 'Action : comparison
     and 'Environment : comparison> =
@@ -20,6 +23,28 @@ type CartesianFrame<'Action, 'Environment, 'World
     /// given state.
     member frame.Item(a, e) =
         frame.Operator(a, e)
+
+    /// Display string.
+    member frame.String =
+        seq {
+            ""
+            seq {
+                ""
+                for e in frame.Environments do
+                    string e
+            } |> String.concat "\t"
+
+            for a in frame.Actions do
+                seq {
+                    string a
+                    for e in frame.Environments do
+                        string frame[a, e]
+                } |> String.concat "\t"
+        } |> String.concat Environment.NewLine
+
+    /// Display string.
+    override frame.ToString() =
+        frame.String
 
 module CartesianFrame =
 

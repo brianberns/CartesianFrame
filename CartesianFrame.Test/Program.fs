@@ -13,7 +13,7 @@ module Program =
                 "a2", "e2", "w5"
                 "a2", "e3", "w6"
             ]
-        CartesianFrame.print C
+        printfn $"{C}"
 
         let D =
             CartesianFrame.ofTuples [
@@ -27,8 +27,8 @@ module Program =
                 "b3", "f2", "w5"
                 "b3", "f3", "w6"
             ]
-        CartesianFrame.print D
-        CartesianFrame.print (CartesianFrame.collapse D)
+        printfn $"{D}"
+        printfn $"{CartesianFrame.collapse D}"
 
     let example2 () =
 
@@ -43,7 +43,7 @@ module Program =
                 "~C", "OC", "o"
                 "~C", "AC", "a"
             ]
-        CartesianFrame.print D
+        printfn $"{D}"
 
         let D' =
             D
@@ -52,7 +52,7 @@ module Program =
                     | "c" -> 3
                     | _ -> failwith "Unexpected")
                 |> CartesianFrame.collapse
-        CartesianFrame.print D'
+        printfn $"{D'}"
 
     let example3 () =
 
@@ -73,7 +73,7 @@ module Program =
             ]
 
         let D' = CartesianFrame.apply C D
-        CartesianFrame.print D'
+        printfn $"{D'}"
 
     example1 ()
     example2 ()
