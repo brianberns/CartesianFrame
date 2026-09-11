@@ -28,9 +28,16 @@ module Fuzz =
 
     let private genFrame =
         gen {
-            let! nA = Gen.choose (1, 3)
-            let! nE = Gen.choose (1, 3)
-            let! nW = Gen.choose (1, 4)
+            let genSize =
+                Gen.frequency [
+                    1, Gen.constant 0
+                    9, Gen.choose (1, 3)
+                ]
+            let! nA = genSize
+            let! nE = genSize
+            let! nW =
+                if nA > 0 && nE > 0 then Gen.choose (1, 4)
+                else Gen.constant 0
             return! genFrameImpl nA nE [ 0 .. nW - 1 ]
         }
 
@@ -53,15 +60,15 @@ module Fuzz =
         let genTower =
             gen {
                 let! nW = Gen.choose (1, 4)
-                let! nV = Gen.choose (1, 3)
-                let! nU = Gen.choose (1, 3)
-                let! nB = Gen.choose (1, 3)
+                let! nC = Gen.choose (1, 3)
                 let! mC = Gen.choose (1, 3)
+                let! nD = Gen.choose (1, 3)
                 let! mD = Gen.choose (1, 3)
+                let! nE = Gen.choose (1, 3)
                 let! mE = Gen.choose (1, 3)
-                let! C = genFrameImpl nV mC [ 0 .. nW - 1 ]   // worlds from W
-                let! D = genFrameImpl nU mD [ 0 .. nV - 1 ]   // worlds from Agent(C)
-                let! E = genFrameImpl nB mE [ 0 .. nU - 1 ]   // worlds from Agent(D)
+                let! C = genFrameImpl nC mC [ 0 .. nW - 1 ]   // worlds from W
+                let! D = genFrameImpl nD mD [ 0 .. nC - 1 ]   // worlds from Agent(C)
+                let! E = genFrameImpl nE mE [ 0 .. nD - 1 ]   // worlds from Agent(D)
                 return C, D, E
             }
 
