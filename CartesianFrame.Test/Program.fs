@@ -2,6 +2,9 @@ namespace CartesianFrame
 
 module Program =
 
+    let print C =
+        printfn $"{CartesianFrame.toString C}"
+
     let example1 () =
 
         let C =
@@ -13,7 +16,7 @@ module Program =
                 "a2", "e2", "w5"
                 "a2", "e3", "w6"
             ]
-        printfn $"{C}"
+        print C
 
         let D =
             CartesianFrame.ofTuples [
@@ -27,8 +30,8 @@ module Program =
                 "b3", "f2", "w5"
                 "b3", "f3", "w6"
             ]
-        printfn $"{D}"
-        printfn $"{CartesianFrame.collapse D}"
+        print D
+        print (CartesianFrame.collapse D)
 
     let example2 () =
 
@@ -43,7 +46,7 @@ module Program =
                 "~C", "OC", "o"
                 "~C", "AC", "a"
             ]
-        printfn $"{D}"
+        print D
 
         let D' =
             D
@@ -52,7 +55,7 @@ module Program =
                     | "c" -> 3
                     | _ -> failwith "Unexpected")
                 |> CartesianFrame.collapse
-        printfn $"{D'}"
+        print D'
 
     let example3 () =
 
@@ -73,7 +76,7 @@ module Program =
             ]
 
         let D' = CartesianFrame.apply C D
-        printfn $"{D'}"
+        print D'
 
     example1 ()
     example2 ()

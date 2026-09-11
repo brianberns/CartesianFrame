@@ -1,5 +1,7 @@
 ﻿namespace CartesianFrame
 
+open System
+
 open FsCheck
 open FsCheck.FSharp
 
@@ -23,3 +25,21 @@ module CartesianFrame =
             Environments = envs
             Operator = fun key -> map[key]
         }
+
+    /// Display string.
+    let toString frame =
+        seq {
+            ""
+            seq {
+                ""
+                for e in frame.Environments do
+                    string e
+            } |> String.concat "\t"
+
+            for a in frame.Actions do
+                seq {
+                    string a
+                    for e in frame.Environments do
+                        string frame[a, e]
+                } |> String.concat "\t"
+        } |> String.concat Environment.NewLine
