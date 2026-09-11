@@ -38,7 +38,7 @@ module CartesianFrame =
                 seq {
                     for a in C.Actions do
                         for e in C.Environments ->
-                            C[a ,e], D[a, e]
+                            C[a, e], D[a, e]
                 }
             Seq.forall (fun (x, y) -> x = y) pairs
         else false
