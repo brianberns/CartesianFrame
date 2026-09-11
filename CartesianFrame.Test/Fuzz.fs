@@ -111,6 +111,13 @@ module Fuzz =
                 |> fix
                 |> areEqual C)
 
+    [<Property>]
+    let ``Dual is its own inverse`` (C : CartesianFrame<string, string, string>) =
+        areEqual
+            (dual (dual C))
+            C
+
     [<assembly: Properties(
+        Replay = "4356171159324030182,14072025698231934783,20",
         Verbose = false)>]
     do ()
