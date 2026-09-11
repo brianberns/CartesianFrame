@@ -23,6 +23,26 @@ type CartesianFrame<'Action, 'Environment, 'World
 
 module CartesianFrame =
 
+    /// Possible worlds produced by the given frame.
+    let image C =
+        set [
+            for a in C.Actions do
+                for e in C.Environments -> C[a, e]
+        ]
+
+    /// Determines whether the two frames are equal.
+    let areEqual C D =
+        if C.Actions = D.Actions
+            && C.Environments = D.Environments then
+            let pairs =
+                seq {
+                    for a in C.Actions do
+                        for e in C.Environments ->
+                            C[a ,e], D[a, e]
+                }
+            Seq.forall (fun (x, y) -> x = y) pairs
+        else false
+
     /// Answers the dual (matrix transposition) of the given frame.
     let dual C =
         {
@@ -69,6 +89,7 @@ module CartesianFrame =
 
     /// Applies the functor induced by frame C to frame D.
     let apply C D =
+        assert((image D).IsSubsetOf(C.Actions))
         {
             Actions = D.Actions
             Environments =
