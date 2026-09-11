@@ -23,6 +23,15 @@ type CartesianFrame<'Action, 'Environment, 'World
 
 module CartesianFrame =
 
+    /// Creates a frame where the agent chooses a world
+    /// directly.
+    let ofWorlds worlds =
+        {
+            Actions = worlds
+            Environments = Set.singleton ()
+            Operator = fst
+        }
+
     /// Possible worlds produced by the given frame.
     let image C =
         set [
