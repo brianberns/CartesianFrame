@@ -32,6 +32,15 @@ module CartesianFrame =
             Operator = fst
         }
 
+    /// Creates a frame where the environment chooses a
+    /// world directly.
+    let one worlds =
+        {
+            Actions = Set.singleton ()
+            Environments = worlds
+            Operator = snd
+        }
+
     /// Possible worlds produced by the given frame.
     let image C =
         set [

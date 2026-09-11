@@ -117,7 +117,39 @@ module Fuzz =
             (dual (dual C))
             C
 
+    [<Property>]
+    let ``Collapse is idempotent`` (C : CartesianFrame<string, string, int>) =
+        areEqual
+            (collapse (collapse C))
+            (collapse C)
+
+    [<Property>]
+    let ``Collapse and dual commute`` (C : CartesianFrame<string, string, int>) =
+        areEqual
+            (collapse (dual C))
+            (dual (collapse C))
+
+    [<Property>]
+    let ``Row vector and column vector are duals`` (S : Set<int>) =
+        areEqual
+            (dual (ofWorlds S))
+            (one S)
+
+    [<Property>]
+    let ``Map preserves identity`` (C : CartesianFrame<string, string, int>) =
+        areEqual
+            (map id C)
+            C
+
+    [<Property>]
+    let ``Map preserves composition``
+        (f : int -> float)
+        (g : float -> string)
+        (C : CartesianFrame<string, string, int>) =
+        areEqual
+            (map g (map f C))
+            (map (f >> g) C)
+
     [<assembly: Properties(
-        Replay = "4356171159324030182,14072025698231934783,20",
         Verbose = false)>]
     do ()
