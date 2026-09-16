@@ -112,6 +112,10 @@ module Fuzz =
     let ``Dual is its own inverse`` (C : CartesianFrame<string, string, string>) =
         dual (dual C) = C
 
+    [<Property>]
+    let ``Hashes of equal frames are equal`` (C : CartesianFrame<string, string, int>) =
+        hash (dual (dual C)) = hash C
+
     let private getRowsWithin C C' =
         set [
             for a in C'.Actions do

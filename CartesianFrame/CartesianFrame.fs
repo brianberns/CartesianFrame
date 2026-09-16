@@ -1,6 +1,7 @@
 ﻿namespace CartesianFrame
 
 open System
+open System.Collections.Generic
 
 /// Cartesian frame as defined in https://arxiv.org/pdf/2109.10996.
 [<CustomEquality; NoComparison>]
@@ -27,16 +28,16 @@ type CartesianFrame<'Action, 'Environment, 'World
 
     /// Determines whether two frames are equal.
     member frame.Equals(other) =
-        if frame.Actions = other.Actions
-            && frame.Environments = other.Environments then
-            let pairs =
-                seq {
-                    for a in frame.Actions do
-                        for e in frame.Environments ->
-                            frame[a, e], other[a, e]
-                }
-            Seq.forall (fun (x, y) -> x = y) pairs
-        else false
+        let comparer = EqualityComparer<'World>.Default   // e.g. NaN is equal to itself
+        frame.Actions = other.Actions
+            && frame.Environments = other.Environments
+            && Seq.forall (fun (a, e) ->
+                comparer.Equals(
+                    frame[a, e],
+                    other[a, e]))
+                (Seq.allPairs
+                    frame.Actions
+                    frame.Environments)
 
     interface IEquatable<CartesianFrame<'Action, 'Environment, 'World>> with
 
@@ -53,7 +54,14 @@ type CartesianFrame<'Action, 'Environment, 'World
     /// Hashes the given frame such that two equal frames produce
     /// the same result.
     override frame.GetHashCode() =
-        hash (frame.Actions, frame.Environments)
+        let comparer = EqualityComparer<'World>.Default
+        let hc = HashCode()
+        hc.Add(frame.Actions)
+        hc.Add(frame.Environments)
+        for a in frame.Actions do
+            for e in frame.Environments do
+                hc.Add(frame[a, e], comparer)
+        hc.ToHashCode()
 
 module CartesianFrame =
 
