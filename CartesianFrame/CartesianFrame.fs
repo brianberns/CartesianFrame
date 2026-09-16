@@ -44,10 +44,11 @@ type CartesianFrame<'Action, 'Environment, 'World
         member frame.Equals(other) = frame.Equals(other)
 
     /// Determines whether two frames are equal.
-    override frame.Equals(obj : obj) =
+    override frame.Equals(obj) =
         match obj with
-        | :? CartesianFrame<'Action, 'Environment, 'World> as other -> frame.Equals(other)
-        | _ -> false
+            | :? CartesianFrame<'Action, 'Environment, 'World> as other ->
+                frame.Equals(other)
+            | _ -> false
 
     /// Hashes the given frame such that two equal frames produce
     /// the same result.
