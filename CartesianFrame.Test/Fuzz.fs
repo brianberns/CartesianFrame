@@ -117,21 +117,21 @@ module Fuzz =
             (dual (dual C))
             C
 
-    let getRowsWithin C C' =
+    let private getRowsWithin C C' =
         set [
             for a in C'.Actions do
                 [ for e in C.Environments -> C[a, e] ]
         ]
 
-    let getColumnsWithin C C' =
+    let private getColumnsWithin C C' =
         set [
             for e in C'.Environments do
                 [ for a in C.Actions -> C[a, e] ]
         ]
 
-    let getRows C = getRowsWithin C C
+    let private getRows C = getRowsWithin C C
 
-    let getColumns C = getColumnsWithin C C
+    let private getColumns C = getColumnsWithin C C
 
     [<Property>]
     let ``Collapse is nondestructive`` () =
