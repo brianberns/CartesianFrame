@@ -134,7 +134,7 @@ module CartesianFrame =
             Operator = fun key -> C[key] |> f
         }
 
-    /// Applies the functor induced by frame C to frame D.
+    /// Uses frame C to refine frame D's values.
     let apply C D =
         assert((image D).IsSubsetOf(C.Actions))
         {
