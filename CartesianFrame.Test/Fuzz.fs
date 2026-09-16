@@ -117,17 +117,53 @@ module Fuzz =
             (dual (dual C))
             C
 
-    [<Property>]
-    let ``Collapse is idempotent`` (C : CartesianFrame<string, string, int>) =
-        areEqual
-            (collapse (collapse C))
-            (collapse C)
+    let getRowsWithin C C' =
+        set [
+            for a in C'.Actions do
+                [ for e in C.Environments -> C[a, e] ]
+        ]
+
+    let getColumnsInside C C' =
+        set [
+            for e in C'.Environments do
+                [ for a in C.Actions -> C[a, e] ]
+        ]
+
+    let getRows C = getRowsWithin C C
+
+    let getColumns C = getColumnsInside C C
 
     [<Property>]
-    let ``Collapse and dual commute`` (C : CartesianFrame<string, string, int>) =
-        areEqual
-            (collapse (dual C))
-            (dual (collapse C))
+    let ``Collapse is nondestructive`` () =
+
+        Prop.forAll (Arb.fromGen genFrame) (fun C ->
+            let C' = collapse C
+            C'.Actions.IsSubsetOf(C.Actions)
+                && C'.Environments.IsSubsetOf(C.Environments)
+                && getRowsWithin C C' = getRows C
+                && getColumnsInside C C' = getColumns C)
+
+    [<Property>]
+    let ``Collapsed frame is biextensional`` () =
+
+        Prop.forAll (Arb.fromGen genFrame) (fun C ->
+            let C' = collapse C
+            (getRows C').Count = C'.Actions.Count
+                && (getColumns C').Count = C'.Environments.Count)
+
+    [<Property>]
+    let ``Collapse is idempotent`` () =
+        Prop.forAll (Arb.fromGen genFrame) (fun C ->
+            areEqual
+                (collapse (collapse C))
+                (collapse C))
+
+    [<Property>]
+    let ``Collapse and dual commute`` () =
+        Prop.forAll (Arb.fromGen genFrame) (fun C ->
+            areEqual
+                (collapse (dual C))
+                (dual (collapse C)))
 
     [<Property>]
     let ``Row vector and column vector are duals`` (S : Set<int>) =
