@@ -1,9 +1,13 @@
 ﻿namespace CartesianFrame
 
+open System
+
 /// Cartesian frame as defined in https://arxiv.org/pdf/2109.10996.
+[<CustomEquality; NoComparison>]
 type CartesianFrame<'Action, 'Environment, 'World
     when 'Action : comparison
-    and 'Environment : comparison> =
+    and 'Environment : comparison
+    and 'World : equality> =
     {
         /// Actions available to the agent.
         Actions : Set<'Action>
@@ -20,6 +24,35 @@ type CartesianFrame<'Action, 'Environment, 'World
     /// given state.
     member frame.Item(a, e) =
         frame.Operator(a, e)
+
+    /// Determines whether two frames are equal.
+    member frame.Equals(other) =
+        if frame.Actions = other.Actions
+            && frame.Environments = other.Environments then
+            let pairs =
+                seq {
+                    for a in frame.Actions do
+                        for e in frame.Environments ->
+                            frame[a, e], other[a, e]
+                }
+            Seq.forall (fun (x, y) -> x = y) pairs
+        else false
+
+    interface IEquatable<CartesianFrame<'Action, 'Environment, 'World>> with
+
+        /// Determines whether two frames are equal.
+        member frame.Equals(other) = frame.Equals(other)
+
+    /// Determines whether two frames are equal.
+    override frame.Equals(obj : obj) =
+        match obj with
+        | :? CartesianFrame<'Action, 'Environment, 'World> as other -> frame.Equals(other)
+        | _ -> false
+
+    /// Hashes the given frame such that two equal frames produce
+    /// the same result.
+    override frame.GetHashCode() =
+        hash (frame.Actions, frame.Environments)
 
 module CartesianFrame =
 
@@ -47,19 +80,6 @@ module CartesianFrame =
             for a in C.Actions do
                 for e in C.Environments -> C[a, e]
         ]
-
-    /// Determines whether the two frames are equal.
-    let areEqual C D =
-        if C.Actions = D.Actions
-            && C.Environments = D.Environments then
-            let pairs =
-                seq {
-                    for a in C.Actions do
-                        for e in C.Environments ->
-                            C[a, e], D[a, e]
-                }
-            Seq.forall (fun (x, y) -> x = y) pairs
-        else false
 
     /// Answers the dual (matrix transposition) of the given frame.
     let dual C =

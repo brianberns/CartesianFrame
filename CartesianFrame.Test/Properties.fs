@@ -73,9 +73,8 @@ module Fuzz =
             }
 
         Prop.forAll (Arb.fromGen genTower) (fun (C, D, E) ->
-            areEqual
-                (reassociate (apply C (apply D E)))
-                (apply (apply C D) E))
+            reassociate (apply C (apply D E)) =
+                apply (apply C D) E)
 
     let private fixLeft C =
         {
@@ -100,20 +99,18 @@ module Fuzz =
         Prop.forAll (Arb.fromGen genFrame) (fun C ->
             apply (ofWorlds (image C)) C
                 |> fixLeft
-                |> areEqual C)
+                = C)
 
     [<Property>]
     let ``Right unit law`` () =
         Prop.forAll (Arb.fromGen genFrame) (fun C ->
             apply C (ofWorlds C.Actions)
                 |> fixRight
-                |> areEqual C)
+                = C)
 
     [<Property>]
     let ``Dual is its own inverse`` (C : CartesianFrame<string, string, string>) =
-        areEqual
-            (dual (dual C))
-            C
+        dual (dual C) = C
 
     let private getRowsWithin C C' =
         set [
@@ -150,37 +147,29 @@ module Fuzz =
     [<Property>]
     let ``Collapse is idempotent`` () =
         Prop.forAll (Arb.fromGen genFrame) (fun C ->
-            areEqual
-                (collapse (collapse C))
-                (collapse C))
+            collapse (collapse C) =
+                collapse C)
 
     [<Property>]
     let ``Collapse and dual commute`` () =
         Prop.forAll (Arb.fromGen genFrame) (fun C ->
-            areEqual
-                (collapse (dual C))
-                (dual (collapse C)))
+            collapse (dual C) =
+                dual (collapse C))
 
     [<Property>]
     let ``Row vector and column vector are duals`` (S : Set<int>) =
-        areEqual
-            (dual (ofWorlds S))
-            (one S)
+        dual (ofWorlds S) = one S
 
     [<Property>]
     let ``Map preserves identity`` (C : CartesianFrame<string, string, int>) =
-        areEqual
-            (map id C)
-            C
+        map id C = C
 
     [<Property>]
     let ``Map preserves composition``
         (f : int -> float)
         (g : float -> string)
         (C : CartesianFrame<string, string, int>) =
-        areEqual
-            (map g (map f C))
-            (map (f >> g) C)
+        map g (map f C) = map (f >> g) C
 
     [<Property>]
     let ``Assume and commit are duals``
@@ -193,9 +182,8 @@ module Fuzz =
             }
 
         Prop.forAll (Arb.fromGen genSubset) (fun envs ->
-            areEqual
-                (assume envs C)
-                (dual (commit envs (dual C))))
+            assume envs C =
+                dual (commit envs (dual C)))
 
     [<Property>]
     let ``Commit is apply with a subset of actions``
@@ -208,9 +196,8 @@ module Fuzz =
             }
 
         Prop.forAll (Arb.fromGen genSubset) (fun actions ->
-            areEqual
-                (commit actions C)
-                (fixRight (apply C (ofWorlds actions))))
+            commit actions C =
+                fixRight (apply C (ofWorlds actions)))
 
     [<assembly: Properties(
         Verbose = false)>]

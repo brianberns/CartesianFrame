@@ -32,8 +32,7 @@ module Facts =
                 "~C", "AC", 2
             ]
 
-        Assert.True(
-            CartesianFrame.areEqual expected actual)
+        Assert.Equal(expected, actual)
 
     [<Fact>]
     let ``Apply refines values`` () =
@@ -66,5 +65,4 @@ module Facts =
                 "Decline", ("WA offer", "Largest"), "Seattle"
             ]
 
-        Assert.True(
-            CartesianFrame.areEqual expected actual)
+        Assert.Equal(expected, actual)
