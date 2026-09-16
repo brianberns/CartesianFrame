@@ -135,7 +135,6 @@ module Fuzz =
 
     [<Property>]
     let ``Collapse is nondestructive`` () =
-
         Prop.forAll (Arb.fromGen genFrame) (fun C ->
             let C' = collapse C
             C'.Actions.IsSubsetOf(C.Actions)
@@ -145,7 +144,6 @@ module Fuzz =
 
     [<Property>]
     let ``Collapsed frame is biextensional`` () =
-
         Prop.forAll (Arb.fromGen genFrame) (fun C ->
             let C' = collapse C
             (getRows C').Count = C'.Actions.Count
@@ -185,6 +183,21 @@ module Fuzz =
         areEqual
             (map g (map f C))
             (map (f >> g) C)
+
+    [<Property>]
+    let ``Assume and commit are duals``
+        (C : CartesianFrame<string, string, int>) =
+
+        let genSubset =
+            gen {
+                let! env = Gen.subListOf C.Environments
+                return set env
+            }
+
+        Prop.forAll (Arb.fromGen genSubset) (fun envs ->
+            areEqual
+                (assume envs C)
+                (dual (commit envs (dual C))))
 
     [<assembly: Properties(
         Verbose = false)>]

@@ -121,3 +121,21 @@ module CartesianFrame =
                     let ac = D[ad, ed]
                     C[ac, ec]
         }
+
+    /// Assumes a subset of environments.
+    let assume (envs : Set<_>) C =
+        assert(envs.IsSubsetOf(C.Environments))
+        {
+            Actions = C.Actions
+            Environments = envs
+            Operator = C.Operator
+        }
+
+    /// Commits to a subset of actions.
+    let commit (actions : Set<_>) C =
+        assert(actions.IsSubsetOf(C.Actions))
+        {
+            Actions = actions
+            Environments = C.Environments
+            Operator = C.Operator
+        }
