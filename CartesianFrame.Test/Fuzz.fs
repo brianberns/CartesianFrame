@@ -123,7 +123,7 @@ module Fuzz =
                 [ for e in C.Environments -> C[a, e] ]
         ]
 
-    let getColumnsInside C C' =
+    let getColumnsWithin C C' =
         set [
             for e in C'.Environments do
                 [ for a in C.Actions -> C[a, e] ]
@@ -131,7 +131,7 @@ module Fuzz =
 
     let getRows C = getRowsWithin C C
 
-    let getColumns C = getColumnsInside C C
+    let getColumns C = getColumnsWithin C C
 
     [<Property>]
     let ``Collapse is nondestructive`` () =
@@ -141,7 +141,7 @@ module Fuzz =
             C'.Actions.IsSubsetOf(C.Actions)
                 && C'.Environments.IsSubsetOf(C.Environments)
                 && getRowsWithin C C' = getRows C
-                && getColumnsInside C C' = getColumns C)
+                && getColumnsWithin C C' = getColumns C)
 
     [<Property>]
     let ``Collapsed frame is biextensional`` () =
