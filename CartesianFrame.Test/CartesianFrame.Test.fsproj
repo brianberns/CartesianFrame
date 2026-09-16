@@ -8,7 +8,7 @@
   <ItemGroup>
     <Compile Include="CartesianFrame.fs" />
     <Compile Include="Facts.fs" />
-    <Compile Include="Fuzz.fs" />
+    <Compile Include="Properties.fs" />
   </ItemGroup>
 
   <ItemGroup>
