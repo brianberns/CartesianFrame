@@ -77,38 +77,36 @@ module Fuzz =
                 (reassociate (apply C (apply D E)))
                 (apply (apply C D) E))
 
+    let private fixLeft C =
+        {
+            Actions = C.Actions
+            Environments =
+                Set.map fst C.Environments
+            Operator =
+                fun (a, e) -> C[a, (e, ())]
+        }
+
+    let private fixRight C =
+        {
+            Actions = C.Actions
+            Environments =
+                Set.map snd C.Environments
+            Operator =
+                fun (a, e) -> C[a, ((), e)]
+        }
+
     [<Property>]
     let ``Left unit law`` () =
-
-        let fix C =
-            {
-                Actions = C.Actions
-                Environments =
-                    Set.map fst C.Environments
-                Operator =
-                    fun (a, e) -> C[a, (e, ())]
-            }
-
         Prop.forAll (Arb.fromGen genFrame) (fun C ->
             apply (ofWorlds (image C)) C
-                |> fix
+                |> fixLeft
                 |> areEqual C)
 
     [<Property>]
     let ``Right unit law`` () =
-
-        let fix C =
-            {
-                Actions = C.Actions
-                Environments =
-                    Set.map snd C.Environments
-                Operator =
-                    fun (a, e) -> C[a, ((), e)]
-            }
-
         Prop.forAll (Arb.fromGen genFrame) (fun C ->
             apply C (ofWorlds C.Actions)
-                |> fix
+                |> fixRight
                 |> areEqual C)
 
     [<Property>]
@@ -198,6 +196,21 @@ module Fuzz =
             areEqual
                 (assume envs C)
                 (dual (commit envs (dual C))))
+
+    [<Property>]
+    let ``Commit is apply with a subset of actions``
+        (C : CartesianFrame<string, string, int>) =
+
+        let genSubset =
+            gen {
+                let! actions = Gen.subListOf C.Actions
+                return set actions
+            }
+
+        Prop.forAll (Arb.fromGen genSubset) (fun actions ->
+            areEqual
+                (commit actions C)
+                (fixRight (apply C (ofWorlds actions))))
 
     [<assembly: Properties(
         Verbose = false)>]
