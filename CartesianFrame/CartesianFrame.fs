@@ -168,3 +168,35 @@ module CartesianFrame =
             Environments = C.Environments
             Operator = C.Operator
         }
+
+    /// Permutes the given list.
+    let rec permute = function
+        | [] -> [ [] ]
+        | xs ->
+            [
+                for x in xs do
+                    for p in permute (List.except [ x ] xs) ->
+                        x :: p
+            ]
+
+    /// Are the given frames equivalent? This is true iff their
+    /// biextensional collapses are isomorphic.
+    let areEquivalent C D =
+        let C' = collapse C
+        let D' = collapse D
+        if C'.Actions.Count = D'.Actions.Count
+            && C'.Environments.Count = D'.Environments.Count
+            && image C' = image D' then
+                let acs = Set.toList C'.Actions
+                let ads = Set.toList D'.Actions
+                Seq.exists (fun acs ->                    // is there a permutation of C's actions that matches D's actions?
+                    let pairs = Seq.zip acs ads
+                    Seq.forall (fun ed ->                 // do all of D's environments match one of C's?
+                        Seq.exists (fun ec ->             // is there a C environment that matches this D environment?
+                            Seq.forall (fun (ac, ad) ->   // do all of the action pairs have the same value in these two environments?
+                                C'[ac, ec] = D'[ad, ed])
+                                pairs)
+                            C'.Environments)
+                        D'.Environments)
+                    (permute acs)
+        else false

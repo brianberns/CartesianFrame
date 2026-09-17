@@ -203,6 +203,11 @@ module Fuzz =
             commit actions C =
                 fixRight (apply C (ofWorlds actions)))
 
+    [<Property>]
+    let ``Identical frames are equivalent`` () =
+        Prop.forAll (Arb.fromGen genFrame) (fun C ->
+            areEquivalent C C)
+
     [<assembly: Properties(
         Verbose = false)>]
     do ()
