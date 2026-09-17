@@ -200,3 +200,50 @@ module CartesianFrame =
                         D'.Environments)
                     (permute acs)
         else false
+
+    /// Determines whther the given set of "blocks"
+    /// partition the given set of items.
+    let private isPartition blocks items =
+        not (Set.contains Set.empty blocks)                   // no empty blocks
+            && Set.unionMany blocks = items                   // blocks contain contain every item and no extra items
+            && Seq.sumBy Set.count blocks = Set.count items   // blocks don't overlap
+
+    /// Cartesian product of the given lists.
+    let rec private product = function
+        | [] -> [ [] ]
+        | x :: xs ->
+            let restProduct = product xs
+            [ for item in x do
+                for rest in restProduct ->
+                    item :: rest ]
+
+    /// Determines all possible choice functions for the
+    /// given partition.
+    let private getChoiceFunctions (partition : Set<Set<_>>) =
+        let partition = Set.toList partition
+        product partition
+            |> Seq.map (
+                Seq.zip partition >> Map)
+
+    /// Moves block choice into the environment, retaining
+    /// fine-grained action choice.
+    let externalizeBlock partition C =
+        assert(isPartition partition C.Actions)
+        {
+            Actions = set (getChoiceFunctions partition)
+            Environments =
+                set [
+                    for block in partition do
+                        for env in C.Environments ->
+                            block, env
+                ]
+            Operator =
+                fun (choiceFunc, (block, env)) ->
+                    let action = choiceFunc[block]
+                    C[action, env]
+        }
+
+    /// Moves fine-grained action choice into the environment,
+    /// retaining block choice.
+    let externalizeChoice partition C =
+        failwith "Not yet implemented"
