@@ -275,6 +275,77 @@ module Properties =
         Prop.forAll (Arb.fromGen genPair) (fun (C, D) ->
             areEquivalent C D = bruteForceEquivalent C D)
 
+    /// A frame, plus a random partition of its actions.
+    let private genPartitioned =
+        gen {
+            let! C = genFrame
+            let! blockOf =
+                Gen.choose (0, max 0 (C.Actions.Count - 1))
+                    |> Gen.listOfLength C.Actions.Count
+            let partition =
+                Seq.zip C.Actions blockOf
+                    |> Seq.groupBy snd
+                    |> Seq.map (snd >> Seq.map fst >> set)
+                    |> set
+            return C, partition
+        }
+
+    [<Property>]
+    let ``Choice functions are valid and complete`` () =
+        Prop.forAll (Arb.fromGen genPartitioned) (fun (C, partition) ->
+            let choiceFuncs = (externalizeBlock partition C).Actions
+            let isValid (choiceFunc : Map<Set<int>, int>) =
+                set choiceFunc.Keys = partition
+                    && partition |> Set.forall (fun block ->
+                        block.Contains(choiceFunc[block]))
+            Set.forall isValid choiceFuncs
+                    // a set of valid choice functions this large must contain all of them
+                && choiceFuncs.Count = (partition |> Seq.map Set.count |> Seq.fold ( * ) 1))
+
+    [<Property>]
+    let ``Re-bracketing an externalized block gives back the frame`` () =
+        Prop.forAll (Arb.fromGen genPartitioned) (fun (C, partition) ->
+            let X = externalizeBlock partition C
+                // move the block from the environment back into the agent (Claim 45)
+            let team =
+                {
+                    Actions =
+                        set [
+                            for choiceFunc in X.Actions do
+                                for block in partition ->
+                                    choiceFunc, block
+                        ]
+                    Environments = C.Environments
+                    Operator =
+                        fun ((choiceFunc, block), env) ->
+                            X[choiceFunc, (block, env)]
+                }
+            areEquivalent team C)
+
+    [<Property>]
+    let ``Both externalizations encode the same outcomes`` () =
+        Prop.forAll (Arb.fromGen genPartitioned) (fun (C, partition) ->
+            let X = externalizeBlock partition C
+            let Y = externalizeChoice partition C
+            X.Environments =
+                set [
+                    for block in partition do
+                        for env in C.Environments -> block, env
+                ]
+                && Y.Actions = partition
+                && Y.Environments =
+                    set [
+                        for choiceFunc in X.Actions do
+                            for env in C.Environments -> choiceFunc, env
+                    ]
+                && Seq.forall (fun (block, choiceFunc, env) ->
+                        Y[block, (choiceFunc, env)] = X[choiceFunc, (block, env)])
+                    (seq {
+                        for block in partition do
+                            for choiceFunc in X.Actions do
+                                for env in C.Environments -> block, choiceFunc, env
+                    }))
+
     [<assembly: Properties(
         Verbose = false)>]
     do ()
