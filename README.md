@@ -10,3 +10,19 @@ For example, consider a driver who is deciding whether to drive by the seaside v
 | ------- | ----: | -----: | ----: |
 | Seaside |     1 |      5 |     7 |
 | Highway |     5 |      5 |     5 |
+
+Using this library, this can be written in F# as:
+
+```fsharp
+{
+    Actions = set [ "Seaside"; "Highway" ]
+    Environments = set [ "Rainy"; "Cloudy"; "Sunny" ]
+    Operator = function
+        | "Seaside", "Rainy" -> 1
+        | "Seaside", "Cloudy" -> 5
+        | "Seaside", "Sunny" -> 7
+        | "Highway", "Rainy" -> 5
+        | "Highway", "Cloudy" -> 5
+        | "Highway", "Sunny" -> 5
+}
+```
