@@ -151,21 +151,21 @@ module CartesianFrame =
                     C[ac, ec]
         }
 
-    /// Assumes a subset of environments.
-    let assume (envs : Set<_>) C =
-        assert(envs.IsSubsetOf(C.Environments))
-        {
-            Actions = C.Actions
-            Environments = envs
-            Operator = C.Operator
-        }
-
     /// Commits to a subset of actions.
     let commit (actions : Set<_>) C =
         assert(actions.IsSubsetOf(C.Actions))
         {
             Actions = actions
             Environments = C.Environments
+            Operator = C.Operator
+        }
+
+    /// Assumes a subset of environments.
+    let assume (envs : Set<_>) C =
+        assert(envs.IsSubsetOf(C.Environments))
+        {
+            Actions = C.Actions
+            Environments = envs
             Operator = C.Operator
         }
 
@@ -201,7 +201,7 @@ module CartesianFrame =
                     (permute acs)
         else false
 
-    /// Determines whther the given set of "blocks"
+    /// Determines whether the given set of "blocks"
     /// partition the given set of items.
     let private isPartition blocks items =
         not (Set.contains Set.empty blocks)                   // no empty blocks

@@ -24,6 +24,7 @@ module Facts =
                 | _ -> failwith "Unexpected")
             |> CartesianFrame.collapse
 
+            // assumes collapse keeps the smallest label from each group of duplicates: A over O, AC over OC
         let expected =
             CartesianFrame.ofTuples [
                 "C", "A", 2
@@ -88,3 +89,17 @@ module Facts =
             ]
 
         Assert.False(CartesianFrame.areEquivalent C D)
+
+    [<Fact>]
+    let ``Image contains every world produced`` () =
+
+        let C =
+            CartesianFrame.ofTuples [
+                "CA", "Capital", "Sacramento"
+                "CA", "Largest", "Los Angeles"
+                "WA", "Capital", "Olympia"
+                "WA", "Largest", "Seattle"
+            ]
+
+        let expected = set [ "Sacramento"; "Los Angeles"; "Olympia"; "Seattle" ]
+        Assert.Equal<Set<string>>(expected, CartesianFrame.image C)

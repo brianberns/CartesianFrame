@@ -2,9 +2,6 @@
 
 open System
 
-open FsCheck
-open FsCheck.FSharp
-
 module CartesianFrame =
 
     let ofTuples tuples =
