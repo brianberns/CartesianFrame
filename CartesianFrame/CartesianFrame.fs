@@ -205,7 +205,7 @@ module CartesianFrame =
     /// partition the given set of items.
     let private isPartition blocks items =
         not (Set.contains Set.empty blocks)                   // no empty blocks
-            && Set.unionMany blocks = items                   // blocks contain contain every item and no extra items
+            && Set.unionMany blocks = items                   // blocks contain every item and no extra items
             && Seq.sumBy Set.count blocks = Set.count items   // blocks don't overlap
 
     /// Cartesian product of the given lists.
@@ -246,4 +246,17 @@ module CartesianFrame =
     /// Moves fine-grained action choice into the environment,
     /// retaining block choice.
     let externalizeChoice partition C =
-        failwith "Not yet implemented"
+        assert(isPartition partition C.Actions)
+        {
+            Actions = partition
+            Environments =
+                set [
+                    for choiceFunc in getChoiceFunctions partition do
+                        for env in C.Environments ->
+                            choiceFunc, env
+                ]
+            Operator =
+                fun (block, (choiceFunc, env)) ->
+                    let action = choiceFunc[block]
+                    C[action, env]
+        }
