@@ -66,3 +66,25 @@ module Facts =
             ]
 
         Assert.Equal(expected, actual)
+
+    [<Fact>]
+    let ``Same row values, not equivalent`` () =
+
+        let C =
+            CartesianFrame.ofTuples [
+                "CA", "Capital", "Sacramento"
+                "CA", "Largest", "Los Angeles"
+                "WA", "Capital", "Olympia"
+                "WA", "Largest", "Seattle"
+            ]
+
+            // same row values up to order and same image, but no relabelling makes the frames match
+        let D =
+            CartesianFrame.ofTuples [
+                "CA", "Capital", "Sacramento"
+                "CA", "Largest", "Los Angeles"
+                "WA", "Capital", "Seattle"
+                "WA", "Largest", "Olympia"
+            ]
+
+        Assert.False(CartesianFrame.areEquivalent C D)

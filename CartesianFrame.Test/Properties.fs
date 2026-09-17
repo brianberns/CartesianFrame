@@ -3,7 +3,7 @@
 open FsCheck.FSharp
 open FsCheck.Xunit
 
-module Fuzz =
+module Properties =
 
     open CartesianFrame
 
@@ -76,36 +76,21 @@ module Fuzz =
             reassociate (apply C (apply D E)) =
                 apply (apply C D) E)
 
-    let private fixLeft C =
-        {
-            Actions = C.Actions
-            Environments =
-                Set.map fst C.Environments
-            Operator =
-                fun (a, e) -> C[a, (e, ())]
-        }
-
-    let private fixRight C =
-        {
-            Actions = C.Actions
-            Environments =
-                Set.map snd C.Environments
-            Operator =
-                fun (a, e) -> C[a, ((), e)]
-        }
-
     [<Property>]
     let ``Left unit law`` () =
+
+        let fix C =
+            {
+                Actions = C.Actions
+                Environments =
+                    Set.map fst C.Environments
+                Operator =
+                    fun (a, e) -> C[a, (e, ())]
+            }
+
         Prop.forAll (Arb.fromGen genFrame) (fun C ->
             apply (ofWorlds (image C)) C
-                |> fixLeft
-                = C)
-
-    [<Property>]
-    let ``Right unit law`` () =
-        Prop.forAll (Arb.fromGen genFrame) (fun C ->
-            apply C (ofWorlds C.Actions)
-                |> fixRight
+                |> fix
                 = C)
 
     [<Property>]
@@ -138,6 +123,8 @@ module Fuzz =
             let C' = collapse C
             C'.Actions.IsSubsetOf(C.Actions)
                 && C'.Environments.IsSubsetOf(C.Environments)
+                    // collapsed frame keeps the original cell values
+                && C' = commit C'.Actions (assume C'.Environments C)
                 && getRowsWithin C C' = getRows C
                 && getColumnsWithin C C' = getColumns C)
 
@@ -147,12 +134,6 @@ module Fuzz =
             let C' = collapse C
             (getRows C').Count = C'.Actions.Count
                 && (getColumns C').Count = C'.Environments.Count)
-
-    [<Property>]
-    let ``Collapse is idempotent`` () =
-        Prop.forAll (Arb.fromGen genFrame) (fun C ->
-            collapse (collapse C) =
-                collapse C)
 
     [<Property>]
     let ``Collapse and dual commute`` () =
@@ -190,23 +171,109 @@ module Fuzz =
                 dual (commit envs (dual C)))
 
     [<Property>]
-    let ``Commit is apply with a subset of actions``
-        (C : CartesianFrame<string, string, int>) =
+    let ``Commit is apply with a subset of actions`` () =
 
-        let genSubset =
-            gen {
-                let! actions = Gen.subListOf C.Actions
-                return set actions
+        let fix C =
+            {
+                Actions = C.Actions
+                Environments =
+                    Set.map snd C.Environments
+                Operator =
+                    fun (a, e) -> C[a, ((), e)]
             }
 
-        Prop.forAll (Arb.fromGen genSubset) (fun actions ->
+        let genCase =
+            gen {
+                let! C = genFrame
+                let! actions = Gen.subListOf C.Actions
+                return C, set actions
+            }
+
+        Prop.forAll (Arb.fromGen genCase) (fun (C, actions) ->
             commit actions C =
-                fixRight (apply C (ofWorlds actions)))
+                fix (apply C (ofWorlds actions)))
+
+    /// Disguises the given frame without changing the decision
+    /// problem it represents: renames actions and environments
+    /// to strings in a random order, and sometimes duplicates a
+    /// row and/or a column. The result is always equivalent to
+    /// the given frame.
+    let private genDisguise (C : CartesianFrame<int, int, int>) =
+        gen {
+            let! actionOrder = Gen.shuffle C.Actions
+            let! envOrder = Gen.shuffle C.Environments
+            let! dupAction =
+                if C.Actions.IsEmpty then Gen.constant None
+                else Gen.elements C.Actions |> Gen.optionOf
+            let! dupEnv =
+                if C.Environments.IsEmpty then Gen.constant None
+                else Gen.elements C.Environments |> Gen.optionOf
+
+                // new label -> original label
+            let actionOf =
+                Map [
+                    yield! actionOrder |> Seq.mapi (fun i a -> $"a{i}", a)
+                    yield! dupAction |> Option.map (fun a -> "a-dup", a) |> Option.toList
+                ]
+            let envOf =
+                Map [
+                    yield! envOrder |> Seq.mapi (fun i e -> $"e{i}", e)
+                    yield! dupEnv |> Option.map (fun e -> "e-dup", e) |> Option.toList
+                ]
+
+            return {
+                Actions = set actionOf.Keys
+                Environments = set envOf.Keys
+                Operator = fun (a, e) -> C[actionOf[a], envOf[e]]
+            }
+        }
 
     [<Property>]
-    let ``Identical frames are equivalent`` () =
-        Prop.forAll (Arb.fromGen genFrame) (fun C ->
-            areEquivalent C C)
+    let ``Disguised copies are equivalent`` () =
+        let genCase =
+            gen {
+                let! C = genFrame
+                let! D = genDisguise C
+                return C, D
+            }
+        Prop.forAll (Arb.fromGen genCase) (fun (C, D) ->
+            areEquivalent C D)
+
+    /// Slow but obviously correct equivalence check: tries every
+    /// pairing of actions and every pairing of environments of the
+    /// collapsed frames. Only practical for tiny frames.
+    let private bruteForceEquivalent C D =
+        let C' = collapse C
+        let D' = collapse D
+        let ads = Set.toList D'.Actions
+        let eds = Set.toList D'.Environments
+        C'.Actions.Count = D'.Actions.Count
+            && C'.Environments.Count = D'.Environments.Count
+            && permute (Set.toList C'.Actions)
+                |> Seq.exists (fun acs ->
+                    permute (Set.toList C'.Environments)
+                        |> Seq.exists (fun ecs ->
+                            Seq.forall2 (fun ac ad ->
+                                Seq.forall2 (fun ec ed ->
+                                    C'[ac, ec] = D'[ad, ed])
+                                    ecs eds)
+                                acs ads))
+
+    /// A pair of frames that are equivalent about half the time:
+    /// the second is a disguised copy of either the first frame
+    /// or an independent one.
+    let private genPair =
+        gen {
+            let! C = genFrame
+            let! source = Gen.oneof [ Gen.constant C; genFrame ]
+            let! D = genDisguise source
+            return C, D
+        }
+
+    [<Property>]
+    let ``Equivalence agrees with brute force`` () =
+        Prop.forAll (Arb.fromGen genPair) (fun (C, D) ->
+            areEquivalent C D = bruteForceEquivalent C D)
 
     [<assembly: Properties(
         Verbose = false)>]
