@@ -260,3 +260,13 @@ module CartesianFrame =
                     let action = choiceFunc[block]
                     C[action, env]
         }
+
+    /// Moves block choice into the agent, excluding
+    /// fine-grained environment choice.
+    let internalizeBlock partition C =
+        dual (externalizeBlock partition (dual C))
+
+    /// Moves fine-grained environment choice into the agent,
+    /// excluding block choice.
+    let internalizeChoice partition C =
+        dual (externalizeChoice partition (dual C))
