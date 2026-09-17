@@ -67,7 +67,7 @@ module CartesianFrame =
 
     /// Creates a frame where the agent chooses a world
     /// directly.
-    let ofWorlds worlds =
+    let ofColumn worlds =
         {
             Actions = worlds
             Environments = Set.singleton ()
@@ -76,7 +76,7 @@ module CartesianFrame =
 
     /// Creates a frame where the environment chooses a
     /// world directly.
-    let one worlds =
+    let ofRow worlds =
         {
             Actions = Set.singleton ()
             Environments = worlds

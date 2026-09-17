@@ -89,7 +89,7 @@ module Properties =
             }
 
         Prop.forAll (Arb.fromGen genFrame) (fun C ->
-            apply (ofWorlds (image C)) C
+            apply (ofColumn (image C)) C
                 |> fix
                 = C)
 
@@ -143,7 +143,7 @@ module Properties =
 
     [<Property>]
     let ``Row vector and column vector are duals`` (S : Set<int>) =
-        dual (ofWorlds S) = one S
+        dual (ofColumn S) = ofRow S
 
     [<Property>]
     let ``Map preserves identity`` (C : CartesianFrame<string, string, int>) =
@@ -191,7 +191,7 @@ module Properties =
 
         Prop.forAll (Arb.fromGen genCase) (fun (C, actions) ->
             commit actions C =
-                fix (apply C (ofWorlds actions)))
+                fix (apply C (ofColumn actions)))
 
     /// Disguises the given frame without changing the decision
     /// problem it represents: renames actions and environments
