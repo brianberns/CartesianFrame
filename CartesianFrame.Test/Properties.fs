@@ -249,9 +249,9 @@ module Properties =
         let eds = Set.toList D'.Environments
         C'.Actions.Count = D'.Actions.Count
             && C'.Environments.Count = D'.Environments.Count
-            && permute (Set.toList C'.Actions)
+            && List.permute (Set.toList C'.Actions)
                 |> Seq.exists (fun acs ->
-                    permute (Set.toList C'.Environments)
+                    List.permute (Set.toList C'.Environments)
                         |> Seq.exists (fun ecs ->
                             Seq.forall2 (fun ac ad ->
                                 Seq.forall2 (fun ec ed ->

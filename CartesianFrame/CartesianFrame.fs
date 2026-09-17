@@ -63,6 +63,18 @@ type CartesianFrame<'Action, 'Environment, 'World
                 hc.Add(frame[a, e], comparer)
         hc.ToHashCode()
 
+module List =
+
+    /// Permutes the given list.
+    let rec permute = function
+        | [] -> [ [] ]
+        | xs ->
+            [
+                for x in xs do
+                    for p in permute (List.except [ x ] xs) ->
+                        x :: p
+            ]
+
 module CartesianFrame =
 
     /// Creates a frame where the agent chooses a world
@@ -169,16 +181,6 @@ module CartesianFrame =
             Operator = C.Operator
         }
 
-    /// Permutes the given list.
-    let rec permute = function
-        | [] -> [ [] ]
-        | xs ->
-            [
-                for x in xs do
-                    for p in permute (List.except [ x ] xs) ->
-                        x :: p
-            ]
-
     /// Are the given frames equivalent? This is true iff their
     /// biextensional collapses are isomorphic.
     let areEquivalent C D =
@@ -198,7 +200,7 @@ module CartesianFrame =
                                 pairs)
                             C'.Environments)
                         D'.Environments)
-                    (permute acs)
+                    (List.permute acs)
         else false
 
     /// Determines whether the given set of "blocks"
