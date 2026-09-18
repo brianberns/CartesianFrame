@@ -213,7 +213,7 @@ module CartesianFrame =
         else false
 
     /// Determines whether the given set of "blocks"
-    /// partition the given set of items.
+    /// partitions the given set of items.
     let private isPartition blocks items =
         not (Set.contains Set.empty blocks)                   // no empty blocks
             && Set.unionMany blocks = items                   // blocks contain every item and no extra items
