@@ -75,6 +75,15 @@ module List =
                         x :: p
             ]
 
+    /// Cartesian product of the given lists.
+    let rec product = function
+        | [] -> [ [] ]
+        | x :: xs ->
+            let restProduct = product xs
+            [ for item in x do
+                for rest in restProduct ->
+                    item :: rest ]
+
 module CartesianFrame =
 
     /// Creates a frame where the agent chooses a world
@@ -210,20 +219,11 @@ module CartesianFrame =
             && Set.unionMany blocks = items                   // blocks contain every item and no extra items
             && Seq.sumBy Set.count blocks = Set.count items   // blocks don't overlap
 
-    /// Cartesian product of the given lists.
-    let rec private product = function
-        | [] -> [ [] ]
-        | x :: xs ->
-            let restProduct = product xs
-            [ for item in x do
-                for rest in restProduct ->
-                    item :: rest ]
-
     /// Determines all possible choice functions for the
     /// given partition.
     let private getChoiceFunctions (partition : Set<Set<_>>) =
         let partition = Set.toList partition
-        product partition
+        List.product partition
             |> Seq.map (
                 Seq.zip partition >> Map)
 
