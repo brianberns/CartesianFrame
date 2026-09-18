@@ -212,8 +212,8 @@ module CartesianFrame =
                     (List.permute acs)
         else false
 
-    /// Determines whether the given set of "blocks"
-    /// partitions the given set of items.
+    /// Determines whether the given set of "blocks" partitions
+    /// the given set of items.
     let private isPartition blocks items =
         not (Set.contains Set.empty blocks)                   // no empty blocks
             && Set.unionMany blocks = items                   // blocks contain every item and no extra items
